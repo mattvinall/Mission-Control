@@ -6,6 +6,25 @@ import type {
 } from '@/types';
 
 // ============================================================================
+// DB-BACKED FUNCTIONS (server-side only, falls back to mock)
+// ============================================================================
+
+/**
+ * Get tasks from the Hydra SQLite DB.
+ * Only works server-side; returns mock data on Vercel/client.
+ */
+export async function getTasksFromDB(): Promise<Task[]> {
+  try {
+    const { getLiveTasks, IS_LOCAL } = await import('./data-live');
+    if (!IS_LOCAL) return getAllTasks();
+    const tasks = await getLiveTasks();
+    return tasks.length > 0 ? tasks : getAllTasks();
+  } catch {
+    return getAllTasks();
+  }
+}
+
+// ============================================================================
 // MOCK DATA GENERATORS
 // ============================================================================
 
@@ -31,50 +50,113 @@ export function getDashboardData(): DashboardData {
 }
 
 export function getProjects(): Project[] {
+  const ago = (days: number, hours = 0) =>
+    new Date(now.getTime() - 1000 * 60 * 60 * (days * 24 + hours)).toISOString();
+
   return [
     {
       id: 'proj-pipeline',
       title: 'Pipeline Dev',
       icon: '🚀',
-      description: 'Engineering, product, and infrastructure work for Pipeline.',
+      description: 'Engineering, product, and infrastructure for the Pipeline SaaS platform.',
       stage: 'in-progress',
       priority: 'critical',
-      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30).toISOString(),
+      createdAt: ago(30),
       updatedAt: now.toISOString(),
-      progress: 78,
+      progress: 62,
       tasks: [
-        { id: 't1', title: 'HubSpot CRM Integration', description: 'Build OAuth and sync', status: 'in-progress', priority: 'critical', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['crm', 'integration'], projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
-        { id: 't2', title: 'Beta Launch Prep', description: 'Final QA and docs', status: 'review', priority: 'critical', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['beta', 'launch'], projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
-        { id: 't3', title: 'Performance Optimization', description: 'Speed improvements', status: 'backlog', priority: 'high', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['perf'], projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-1', title: 'HubSpot CRM OAuth Integration', description: 'Build OAuth flow and contact sync', status: 'in-progress', priority: 'critical', createdAt: ago(3), updatedAt: ago(0, 2), tags: ['crm', 'integration', 'oauth'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-2', title: 'Beta Onboarding Flow', description: 'End-to-end signup → first campaign', status: 'in-progress', priority: 'critical', createdAt: ago(5), updatedAt: ago(0, 4), tags: ['onboarding', 'ux'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-3', title: 'Campaign Analytics Dashboard', description: 'Reply rates, open rates, A/B results', status: 'review', priority: 'high', createdAt: ago(7), updatedAt: ago(1), tags: ['analytics', 'ui'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-4', title: 'LinkedIn Safety Rate Limiter', description: 'Auto-pause on restriction detect', status: 'review', priority: 'critical', createdAt: ago(6), updatedAt: ago(0, 8), tags: ['safety', 'linkedin'], assignee: '🐉 Hydra', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-5', title: 'Apollo.io Data Provider', description: 'Add Apollo as lead source', status: 'backlog', priority: 'high', createdAt: ago(10), updatedAt: ago(10), tags: ['data', 'integration'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-6', title: 'Email Warmup Module', description: 'Automated inbox warmup sequences', status: 'backlog', priority: 'medium', createdAt: ago(14), updatedAt: ago(14), tags: ['email', 'warmup'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-7', title: 'Stripe Billing Integration', description: 'Subscription management and webhooks', status: 'done', priority: 'critical', createdAt: ago(21), updatedAt: ago(8), tags: ['billing', 'stripe'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-8', title: 'Multi-sender Inbox Rotation', description: 'Rotate across multiple LinkedIn accounts', status: 'done', priority: 'high', createdAt: ago(18), updatedAt: ago(12), tags: ['linkedin', 'safety'], assignee: '⚡ Dev Agent', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+        { id: 'pd-9', title: 'AI Personalization Engine', description: 'GPT-powered message personalization', status: 'done', priority: 'high', createdAt: ago(25), updatedAt: ago(15), tags: ['ai', 'personalization'], assignee: '🐉 Hydra', projectId: 'proj-pipeline', projectTitle: 'Pipeline Dev', projectIcon: '🚀' },
+      ],
+    },
+    {
+      id: 'proj-ios',
+      title: 'iOS Revenue Apps',
+      icon: '📱',
+      description: 'Portfolio of iOS apps generating passive revenue through App Store.',
+      stage: 'in-progress',
+      priority: 'high',
+      createdAt: ago(45),
+      updatedAt: ago(0, 6),
+      progress: 48,
+      tasks: [
+        { id: 'ios-1', title: 'Habit Tracker v2 Redesign', description: 'Full UI overhaul with widgets', status: 'in-progress', priority: 'high', createdAt: ago(7), updatedAt: ago(0, 3), tags: ['ios', 'ui', 'widgets'], assignee: '⚡ Dev Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-2', title: 'App Store Optimization — Keywords', description: 'Keyword research and metadata update', status: 'in-progress', priority: 'high', createdAt: ago(4), updatedAt: ago(0, 1), tags: ['aso', 'marketing'], assignee: '📣 Marketing Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-3', title: 'In-App Purchase Flow', description: 'Subscription and one-time purchase', status: 'review', priority: 'critical', createdAt: ago(6), updatedAt: ago(1), tags: ['iap', 'revenue'], assignee: '⚡ Dev Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-4', title: 'Push Notification Sequences', description: 'Re-engagement and retention flows', status: 'backlog', priority: 'medium', createdAt: ago(10), updatedAt: ago(10), tags: ['notifications', 'retention'], assignee: '⚡ Dev Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-5', title: 'App #2: Focus Timer', description: 'New Pomodoro + deep work app', status: 'backlog', priority: 'medium', createdAt: ago(15), updatedAt: ago(15), tags: ['new-app', 'productivity'], assignee: '⚡ Dev Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-6', title: 'Screenshot Creative Assets', description: 'App Store screenshots + preview video', status: 'done', priority: 'high', createdAt: ago(20), updatedAt: ago(5), tags: ['creative', 'aso'], assignee: '📣 Marketing Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
+        { id: 'ios-7', title: 'Analytics SDK Integration', description: 'PostHog for funnel analytics', status: 'done', priority: 'medium', createdAt: ago(22), updatedAt: ago(7), tags: ['analytics', 'sdk'], assignee: '⚡ Dev Agent', projectId: 'proj-ios', projectTitle: 'iOS Revenue Apps', projectIcon: '📱' },
       ],
     },
     {
       id: 'proj-gtm',
       title: 'GTM & Marketing',
       icon: '📣',
-      description: 'Content, landing pages, email sequences, YouTube.',
+      description: 'Content engine, demand gen, landing pages, and paid campaigns.',
       stage: 'in-progress',
       priority: 'critical',
-      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 20).toISOString(),
-      updatedAt: now.toISOString(),
-      progress: 65,
+      createdAt: ago(20),
+      updatedAt: ago(0, 1),
+      progress: 55,
       tasks: [
-        { id: 't4', title: 'YouTube Channel Setup', description: 'Create and brand channel', status: 'in-progress', priority: 'high', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['youtube'], projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
-        { id: 't5', title: 'Cold Traffic Offer', description: 'Create offer doc', status: 'done', priority: 'critical', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['offer'], projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-1', title: 'YouTube Channel — First 10 Videos', description: 'Script, record, edit, publish', status: 'in-progress', priority: 'high', createdAt: ago(6), updatedAt: ago(0, 2), tags: ['youtube', 'content'], assignee: '📣 Marketing Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-2', title: 'LinkedIn Content Calendar — Q1', description: '30 posts planned and scheduled', status: 'in-progress', priority: 'high', createdAt: ago(5), updatedAt: ago(0, 3), tags: ['linkedin', 'content'], assignee: '📣 Marketing Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-3', title: 'Cold Email Outreach Sequence', description: '5-step sequence for DFY prospects', status: 'review', priority: 'critical', createdAt: ago(4), updatedAt: ago(0, 12), tags: ['email', 'outreach', 'dfy'], assignee: '📣 Marketing Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-4', title: 'Webinar: AI Outreach Masterclass', description: 'Live demo + pitch for DFY service', status: 'backlog', priority: 'high', createdAt: ago(8), updatedAt: ago(8), tags: ['webinar', 'lead-gen'], assignee: '📣 Marketing Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-5', title: 'SEO Blog — 20 Pillar Articles', description: 'AI outreach, LinkedIn, sales automation', status: 'backlog', priority: 'medium', createdAt: ago(12), updatedAt: ago(12), tags: ['seo', 'content'], assignee: '🔬 Research Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-6', title: 'Paid LinkedIn Ads — Beta', description: 'Thought leader ads A/B test', status: 'backlog', priority: 'medium', createdAt: ago(10), updatedAt: ago(10), tags: ['paid', 'linkedin'], assignee: '📣 Marketing Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-7', title: 'DFY Offer Page + Pricing', description: 'Sales page for Done-For-You tier', status: 'done', priority: 'critical', createdAt: ago(15), updatedAt: ago(3), tags: ['offer', 'landing-page'], assignee: '⚡ Dev Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
+        { id: 'gtm-8', title: 'Competitor Analysis Matrix', description: 'Clay, Expandi, Dripify, Lemlist', status: 'done', priority: 'high', createdAt: ago(18), updatedAt: ago(6), tags: ['research', 'competitive'], assignee: '🔬 Research Agent', projectId: 'proj-gtm', projectTitle: 'GTM & Marketing', projectIcon: '📣' },
       ],
     },
     {
       id: 'proj-mission',
       title: 'Mission Control',
       icon: '🎮',
-      description: 'Internal dashboard for managing AI agents and operations.',
+      description: 'Internal ops dashboard — agents, tasks, decisions, and full situational awareness.',
       stage: 'in-progress',
       priority: 'high',
-      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+      createdAt: ago(5),
       updatedAt: now.toISOString(),
-      progress: 45,
+      progress: 70,
       tasks: [
-        { id: 't6', title: 'Software Factory View', description: 'Build dev pipeline viz', status: 'in-progress', priority: 'high', createdAt: now.toISOString(), updatedAt: now.toISOString(), tags: ['ui'], projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-1', title: 'Projects Kanban View', description: 'Per-project kanban with task cards', status: 'in-progress', priority: 'high', createdAt: ago(1), updatedAt: ago(0, 1), tags: ['ui', 'kanban'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-2', title: 'Agent Live Activity Feed', description: 'Real-time agent actions log', status: 'in-progress', priority: 'high', createdAt: ago(3), updatedAt: ago(0, 2), tags: ['agents', 'realtime'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-3', title: 'Decision Council View', description: 'Track key business decisions', status: 'review', priority: 'medium', createdAt: ago(4), updatedAt: ago(0, 6), tags: ['decisions', 'strategy'], assignee: '🐉 Hydra', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-4', title: 'CRM / People View', description: 'Contact management + deal tracking', status: 'backlog', priority: 'medium', createdAt: ago(5), updatedAt: ago(5), tags: ['crm', 'people'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-5', title: 'Mobile Responsive Layout', description: 'Make all views work on iPhone', status: 'backlog', priority: 'low', createdAt: ago(6), updatedAt: ago(6), tags: ['mobile', 'responsive'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-6', title: 'Software Factory Pipeline', description: 'Visual dev pipeline with stages', status: 'done', priority: 'high', createdAt: ago(4), updatedAt: ago(1), tags: ['ui', 'factory'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-7', title: 'Dashboard Overview Rebuild', description: 'Clean BHAG + metrics layout', status: 'done', priority: 'high', createdAt: ago(5), updatedAt: ago(2), tags: ['ui', 'dashboard'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+        { id: 'mc-8', title: 'Dark Theme + Design System', description: 'Consistent color tokens and spacing', status: 'done', priority: 'medium', createdAt: ago(5), updatedAt: ago(3), tags: ['design', 'theme'], assignee: '⚡ Dev Agent', projectId: 'proj-mission', projectTitle: 'Mission Control', projectIcon: '🎮' },
+      ],
+    },
+    {
+      id: 'proj-content',
+      title: 'Content Engine',
+      icon: '✍️',
+      description: 'Automated content creation and publishing pipeline across all channels.',
+      stage: 'in-progress',
+      priority: 'high',
+      createdAt: ago(14),
+      updatedAt: ago(0, 3),
+      progress: 40,
+      tasks: [
+        { id: 'ce-1', title: 'AI Content Brief Generator', description: 'Auto-generate briefs from keywords', status: 'in-progress', priority: 'high', createdAt: ago(5), updatedAt: ago(0, 2), tags: ['ai', 'brief', 'automation'], assignee: '🐉 Hydra', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-2', title: 'LinkedIn Post Scheduler', description: 'Queue + schedule 30 days of posts', status: 'in-progress', priority: 'high', createdAt: ago(4), updatedAt: ago(0, 4), tags: ['linkedin', 'scheduling'], assignee: '📣 Marketing Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-3', title: 'YouTube → Short-form Repurposer', description: 'Auto-clip YT videos into Reels/Shorts', status: 'review', priority: 'medium', createdAt: ago(6), updatedAt: ago(1), tags: ['video', 'repurpose', 'automation'], assignee: '🐉 Hydra', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-4', title: 'Newsletter Automation', description: 'Weekly digest auto-generated from activity', status: 'backlog', priority: 'medium', createdAt: ago(8), updatedAt: ago(8), tags: ['email', 'newsletter'], assignee: '📣 Marketing Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-5', title: 'SEO Content Agent', description: 'Research → outline → write → publish', status: 'backlog', priority: 'high', createdAt: ago(10), updatedAt: ago(10), tags: ['seo', 'agent', 'automation'], assignee: '🔬 Research Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-6', title: 'Content Performance Tracker', description: 'Unified metrics across all channels', status: 'backlog', priority: 'medium', createdAt: ago(12), updatedAt: ago(12), tags: ['analytics', 'tracking'], assignee: '🔬 Research Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-7', title: 'Brand Voice Guidelines', description: 'AI-enforceable tone + style rules', status: 'done', priority: 'high', createdAt: ago(14), updatedAt: ago(7), tags: ['brand', 'voice'], assignee: '📣 Marketing Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
+        { id: 'ce-8', title: 'Content Idea Database', description: '200+ validated topic ideas seeded', status: 'done', priority: 'medium', createdAt: ago(12), updatedAt: ago(9), tags: ['ideas', 'research'], assignee: '🔬 Research Agent', projectId: 'proj-content', projectTitle: 'Content Engine', projectIcon: '✍️' },
       ],
     },
   ];
