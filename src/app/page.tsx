@@ -1,17 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from '@/components/Sidebar';
 import DashboardView from '@/components/DashboardView';
+import TasksView from '@/components/TasksView';
 import ProjectsView from '@/components/ProjectsView';
+import AgentsView from '@/components/AgentsView';
+import ContentView from '@/components/ContentView';
+import ApprovalsView from '@/components/ApprovalsView';
+import CouncilView from '@/components/CouncilView';
+import CalendarView from '@/components/CalendarView';
+import MemoryView from '@/components/MemoryView';
+import DocsView from '@/components/DocsView';
+import PeopleView from '@/components/PeopleView';
+import TeamsView from '@/components/TeamsView';
+import FactoryView from '@/components/FactoryView';
 import TaskDetail from '@/components/TaskDetail';
-import ActivityView from '@/components/ActivityView';
-import StatsView from '@/components/StatsView';
-
-export type View = 'dashboard' | 'projects' | 'activity' | 'stats';
+import type { ViewType } from '@/types';
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -47,31 +56,33 @@ export default function Home() {
 
     switch (currentView) {
       case 'dashboard':
-        return (
-          <DashboardView
-            onProjectSelect={handleProjectSelect}
-            onTaskSelect={handleTaskSelect}
-          />
-        );
+        return <DashboardView onViewChange={(v: string) => setCurrentView(v as ViewType)} onTaskSelect={handleTaskSelect} />;
+      case 'tasks':
+        return <TasksView onTaskSelect={handleTaskSelect} />;
       case 'projects':
-        return (
-          <ProjectsView
-            selectedProjectId={selectedProjectId}
-            onProjectSelect={handleProjectSelect}
-            onTaskSelect={handleTaskSelect}
-          />
-        );
-      case 'activity':
-        return <ActivityView />;
-      case 'stats':
-        return <StatsView />;
+        return <ProjectsView onProjectSelect={handleProjectSelect} onTaskSelect={handleTaskSelect} />;
+      case 'agents':
+        return <AgentsView />;
+      case 'content':
+        return <ContentView />;
+      case 'approvals':
+        return <ApprovalsView />;
+      case 'council':
+        return <CouncilView />;
+      case 'calendar':
+        return <CalendarView />;
+      case 'memory':
+        return <MemoryView />;
+      case 'docs':
+        return <DocsView />;
+      case 'people':
+        return <PeopleView />;
+      case 'teams':
+        return <TeamsView />;
+      case 'factory':
+        return <FactoryView />;
       default:
-        return (
-          <DashboardView
-            onProjectSelect={handleProjectSelect}
-            onTaskSelect={handleTaskSelect}
-          />
-        );
+        return <DashboardView onViewChange={(v: string) => setCurrentView(v as ViewType)} onTaskSelect={handleTaskSelect} />;
     }
   };
 
@@ -80,14 +91,23 @@ export default function Home() {
       <Sidebar
         currentView={currentView}
         onViewChange={setCurrentView}
-        onProjectSelect={handleProjectSelect}
         collapsed={sidebarCollapsed}
         onToggleCollapsed={() => setSidebarCollapsed(!sidebarCollapsed)}
-        onBackToDashboard={handleBackToDashboard}
       />
       
       <main className="flex-1 overflow-hidden">
-        {renderMainContent()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedTaskId || currentView}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="h-full"
+          >
+            {renderMainContent()}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

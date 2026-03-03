@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 
+const inter = Inter({ subsets: ['latin'] });
+
 export const metadata: Metadata = {
-  title: '🐉 Hydra Mission Control',
-  description: 'Mission Control dashboard for Pipeline Labs - Track projects, tasks, and progress toward $10M ARR',
-  viewport: 'width=device-width, initial-scale=1',
+  title: 'Hydra Mission Control',
+  description: 'AI-powered command center for Pipeline development and operations',
 };
 
 export default function RootLayout({
@@ -13,10 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-gray-950 text-gray-100 antialiased min-h-screen">
-        {children}
-      </body>
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
