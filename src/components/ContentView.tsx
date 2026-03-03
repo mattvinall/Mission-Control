@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { getContentPipeline } from '@/lib/data';
+import { useContentList } from '@/hooks/useData';
 import { cn, formatDate } from '@/lib/utils';
 import type { ContentPiece } from '@/types';
 import { 
@@ -29,7 +30,8 @@ const platformConfig: Record<ContentPiece['platform'], { icon: typeof Linkedin; 
 type PlatformFilter = ContentPiece['platform'] | 'all';
 
 export default function ContentView() {
-  const content = getContentPipeline();
+  const { content: liveContent } = useContentList();
+  const content = liveContent.length > 0 ? liveContent : getContentPipeline();
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
 
   const filtered = platformFilter === 'all' 

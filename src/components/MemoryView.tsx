@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { getMemoryEntries } from '@/lib/data';
+import { useMemoryList } from '@/hooks/useData';
 import { cn, formatDate } from '@/lib/utils';
 import type { MemoryEntry } from '@/types';
 type MemoryCategory = MemoryEntry['category'];
@@ -35,7 +36,8 @@ const categoryIcons: Record<MemoryCategory, typeof Lightbulb> = {
 };
 
 export default function MemoryView() {
-  const memories = getMemoryEntries();
+  const { entries: liveMemories } = useMemoryList();
+  const memories = liveMemories.length > 0 ? liveMemories : getMemoryEntries();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MemoryCategory | 'all'>('all');
   const [selectedMemory, setSelectedMemory] = useState<MemoryEntry | null>(null);
